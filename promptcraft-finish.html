@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-[#DBE2DC]">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find.net</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        'coastal-dark-blue': '#335765',
+                        'coastal-teal-green': '#74A8A4',
+                        'coastal-light-blue': '#B6D9E0',
+                        'coastal-off-white': '#DBE2DC',
+                        'coastal-brown': '#7F543D',
+                    },
+                    animation: {
+                        fadeIn: 'fadeIn 0.3s ease-in-out',
+                        slideUp: 'slideUp 0.3s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: 0 },
+                            '100%': { opacity: 1 },
+                        },
+                        slideUp: {
+                            '0%': { opacity: 0, transform: 'translateY(20px)' },
+                            '100%': { opacity: 1, transform: 'translateY(0)' },
+                        }
+                    }
+                },
+            },
+        };
+    </script>
+    <!-- Custom Styles -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #DBE2DC;
+        }
+        .page-container {
+            display: none; /* All pages hidden by default */
+        }
+        .modal {
+            display: none; /* All modals hidden by default */
+        }
+        
+        /* Lost/Found card glows */
+        .item-card-lost {
+            border: 2px solid #7F543D;
+            /* box-shadow: 0 0 10px rgba(127, 84, 61, 0.5); */
+        }
+        .item-card-found {
+            border: 2px solid #74A8A4;
+            /* box-shadow: 0 0 10px rgba(116, 168, 164, 0.5); */
+        }
+        
+        /* Logout button glow */
+        .logout-btn-hover:hover {
+            background-color: #fef2f2; /* red-50 */
+            color: #dc2626; /* red-600 */
+        }
+    </style>
+</head>
+<body class="font-sans bg-coastal-off-white min-h-screen">
+
+    <!-- 
+      =================================
+      Auth Container (Login/Sign Up)
+      =================================
+    -->
+    <div id="auth-container" class="page-container min-h-[90vh] flex items-center justify-center p-4 animate-fadeIn">
+        <div class="w-full max-w-md">
+            <div class="flex-shrink-0 flex items-center justify-center mb-6">
+                <!-- Clipart Icon -->
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 text-coastal-dark-blue">
+                    <g stroke="#335765" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="20" y="30" width="60" height="40" rx="5" ry="5" fill="#B6D9E0" />
+                        <path d="M 20 35 h 60" />
+                        <circle cx="50" cy="50" r="5" fill="#335765" />
+                        <circle cx="65" cy="25" r="10" stroke-width="4" fill="#DBE2DC" />
+                        <line x1="72" y1="32" x2="80" y2="40" stroke-width="4" />
+                    </g>
+                </svg>
+                <span class="font-bold text-3xl text-coastal-dark-blue ml-2 font-serif">
+                    Find<span class="text-coastal-teal-green">.net</span>
+                </span>
+            </div>
+
+            <div class="bg-white p-8 rounded-lg shadow-md border border-coastal-light-blue">
+                <!-- Tabs -->
+                <div class="mb-4 border-b border-coastal-light-blue">
+                    <nav class="-mb-px flex space-x-6" aria-label="Tabs">
+                        <button id="auth-tab-login" class="w-1/2 py-4 px-1 text-center border-b-2 font-medium text-sm transition-colors duration-200 ease-in-out">
+                            Login
+                        </button>
+                        <button id="auth-tab-signup" class="w-1/2 py-4 px-1 text-center border-b-2 font-medium text-sm transition-colors duration-200 ease-in-out">
+                            Sign Up
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Auth Form -->
+                <form id="auth-form" class="space-y-6">
+                    <div>
+                        <label for="auth-email" class="block text-sm font-medium text-coastal-dark-blue">Email address</label>
+                        <div class="mt-1">
+                            <input id="auth-email" name="email" type="email" autocomplete="email" required
+                                class="appearance-none block w-full px-3 py-2 border border-coastal-light-blue rounded-lg shadow-sm placeholder-coastal-brown/70 focus:outline-none focus:ring-coastal-teal-green focus:border-coastal-teal-green sm:text-sm text-coastal-dark-blue transition-all duration-300">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="auth-password" class="block text-sm font-medium text-coastal-dark-blue">Password</label>
+                        <div class="mt-1">
+                            <input id="auth-password" name="password" type="password" autocomplete="current-password" required
+                                class="appearance-none block w-full px-3 py-2 border border-coastal-light-blue rounded-lg shadow-sm placeholder-coastal-brown/70 focus:outline-none focus:ring-coastal-teal-green focus:border-coastal-teal-green sm:text-sm text-coastal-dark-blue transition-all duration-300">
+                        </div>
+                    </div>
+                    <p id="auth-error-msg" class="text-sm text-red-600"></p>
+                    <div>
+                        <button id="auth-submit-btn" type="submit"
+                            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-coastal-dark-blue hover:bg-coastal-teal-green focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-coastal-dark-blue transition-all duration-300 transform hover:scale-105">
+                            Login
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 
+      =================================
+      Main App Container (Logged In)
+      =================================
+    -->
+    <div id="app-container" class="page-container min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="bg-white shadow-md sticky top-0 z-10">
+            <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <div id="nav-logo" class="text-2xl font-bold cursor-pointer text-coastal-dark-blue transition-transform duration-300 hover:scale-105 font-serif">
+                        Find<span class="text-coastal-teal-green">.net</span>
+                    </div>
+                    <div id="header-community-name" class="hidden sm:flex items-center space-x-2 bg-coastal-off-white px-3 py-1 rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-coastal-dark-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13v-6m0 6l6-3m-6 3V7m0 0l6-3m0 0l6 3m-6-3v6m0 0l6 3m0 0l5.447 2.724A1 1 0 0121 16.382V5.618a1 1 0 01-1.447-.894L15 7m-6 3l6-3" />
+                        </svg>
+                        <span class="text-sm font-medium text-coastal-dark-blue"></span>
+                    </div>
+                    <!-- Desktop Nav -->
+                    <div class="hidden sm:flex sm:items-center sm:space-x-4">
+                        <button id="nav-browse" class="nav-button text-coastal-dark-blue hover:text-coastal-teal-green px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300">Browse</button>
+                        <button id="nav-post" class="nav-button text-coastal-dark-blue hover:text-coastal-teal-green px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300">Post Item</button>
+                        <button id="nav-profile" class="nav-button text-coastal-dark-blue hover:text-coastal-teal-green px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300">Profile</button>
+                        <button id="nav-logout" class="nav-button logout-btn-hover px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300">Logout</button>
+                    </div>
+                    <!-- Mobile Nav -->
+                    <div class="flex sm:hidden items-center space-x-2">
+                        <button id="nav-browse-mobile" class="nav-button-mobile text-coastal-dark-blue hover:text-coastal-teal-green p-2 rounded-full transition-colors duration-300" aria-label="Browse">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                        </button>
+                        <button id="nav-post-mobile" class="nav-button-mobile text-coastal-dark-blue hover:text-coastal-teal-green p-2 rounded-full transition-colors duration-300" aria-label="Post Item">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+                        </button>
+                        <button id="nav-profile-mobile" class="nav-button-mobile text-coastal-dark-blue hover:text-coastal-teal-green p-2 rounded-full transition-colors duration-300" aria-label="Profile">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                        </button>
+                        <button id="nav-logout-mobile" class="nav-button-mobile logout-btn-hover p-2 rounded-full transition-colors duration-300" aria-label="Logout">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h5a3 3 0 013 3v1" /></svg>
+                        </button>
+                    </div>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Main content area where pages will be rendered -->
+        <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full animate-fadeIn">
+            <!-- Page content injected here by JS -->
+        </main>
+
+        <footer class="bg-white border-t border-coastal-light-blue mt-12">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-coastal-brown text-sm">
+                &copy; 2025 Find.net. All rights reserved.
+            </div>
+        </footer>
+    </div>
+    
+    <!-- 
+      =================================
+      PAGE TEMPLATES (Hidden)
+      =================================
+    -->
+
+    <template id="template-browse-page">
+        <div class="space-y-8">
+            <h2 class="text-3xl font-bold text-coastal-dark-blue font-serif">
+                Items for <span id="browse-community-name" class="text-coastal-teal-green">...</span>
+            </h2>
+            <!-- Search and Filter Bar -->
+            <div class="bg-white p-4 rounded-lg shadow-md space-y-4">
+                <div class="flex space-x-2">
+                    <div class="relative flex-1">
+                        <input type="text" id="search-input" placeholder="Search by name, description, location..."
+                            class="w-full p-3 pl-10 border border-coastal-light-blue rounded-lg focus:outline-none focus:ring-2 focus:ring-coastal-teal-green text-coastal-dark-blue transition-all duration-300" />
+                        <div class="absolute left-3 top-1/2 -translate-y-1/2 text-coastal-teal-green">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                        </div>
+                    </div>
+                    <button id="open-filter-modal-btn" class="p-3 bg-coastal-off-white text-coastal-dark-blue rounded-lg hover:bg-coastal-light-blue transition-colors duration-300" aria-label="Open filters">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
+    
+</button>
+                </div>
+            </div>
+            <!-- Items Grid -->
+            <div id="items-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Item cards injected here -->
+            </div>
+            <div id="items-grid-placeholder" class="text-center p-10 bg-white rounded-lg shadow flex-col items-center" style="display: none;">
+                <!-- Placeholder icon -->
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="w-24 h-24 text-coastal-light-blue mx-auto">
+                    <g stroke="#335765" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M 30 35 l -10 0 l 0 40 l 60 0 l 0 -40 l -10 0" fill="#DBE2DC" />
+                        <path d="M 30 35 l 0 -5 a 5 5 0 0 1 5 -5 h 30 a 5 5 0 0 1 5 5 l 0 5" />
+                        <path d="M 45 45 l 10 0" />
+                        <path d="M 45 60 q 0 -10 10 -10 q 5 0 5 5 q 0 5 -5 8 q 0 3 -0 5" />
+                        <circle cx="50" cy="70" r="1" fill="#335765" stroke="none" />
+                    </g>
+                </svg>
+                <p id="items-grid-placeholder-title" class="text-lg text-coastal-dark-blue mt-4 font-serif"></p>
+                <p id="items-grid-placeholder-text" class="text-sm text-coastal-brown"></p>
+            </div>
+        </div>
+    </template>
+
+    <template id="template-post-page">
+        <div class="max-w-lg mx-auto bg-white p-6 sm:p-8 rounded-lg shadow-xl">
+            <button id="post-back-btn" class="flex items-center space-x-2 text-coastal-dark-blue hover:text-coastal-teal-green mb-6 transition-colors duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                <span>Back to Browse</span>
+            </button>
+            <h2 class="text-3xl font-bold text-coastal-dark-blue mb-6 text-center font-serif">Report an Item</h2>
+            <form id="post-item-form" class="space-y-6">
+                <!-- Form content injected by JS -->
+            </form>
+        </div>
+    </template>
+    
+    <template id="template-profile-page">
+        <div class="max-w-md mx-auto bg-white p-8 rounded-xl shadow-2xl space-y-6">
+            <h2 class="text-3xl font-extrabold text-center text-coastal-dark-blue mb-6 font-serif">Your Profile</h2>
+            <div class="space-y-3">
+                <div>
+                    <label class="text-sm font-medium text-coastal-brown">Email</label>
+                    <p id="profile-email" class="text-lg text-coastal-dark-blue bg-coastal-off-white p-3 rounded-lg"></p>
+                </div>
+                <div>
+                    <label class="text-sm font-medium text-coastal-brown">Your Community</label>
+                    <p id="profile-community" class="text-lg text-coastal-dark-blue bg-coastal-off-white p-3 rounded-lg"></p>
+                </div>
+            </div>
+            <div class="space-y-3 pt-4">
+                <button id="profile-change-community-btn" class="w-full flex justify-center py-3 px-4 border border-coastal-dark-blue rounded-lg shadow-sm text-base font-medium text-coastal-dark-blue bg-white hover:bg-coastal-off-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-coastal-dark-blue transition-colors duration-300">
+                    Change Community
+                </button>
+                <button id="profile-logout-btn" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-coastal-brown hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-300">
+                    Log out
+                </button>
+            </div>
+        </div>
+    </template>
+
+    <template id="template-select-community-page">
+        <div class="max-w-lg mx-auto bg-white p-8 rounded-xl shadow-2xl space-y-6">
+            <h2 class="text-3xl font-extrabold text-center text-coastal-dark-blue mb-6 font-serif">Join a Community</h2>
+            <p class="text-center text-coastal-brown">
+                To see lost & found items, you need to join a community (like your college or workplace).
+            </p>
+            <p id="community-error-msg" class="text-sm text-red-600"></p>
+            
+            <form id="community-create-form" class="space-y-3">
+                <h3 class="text-lg font-medium text-coastal-dark-blue font-serif">Create a new community</h3>
+                <div>
+                    <label for="community-name" class="block text-sm font-medium text-coastal-dark-blue">Community Name</label>
+                    <input id="community-name" type="text" placeholder="e.g., Central City College" required
+                        class="appearance-none block w-full px-3 py-2 border border-coastal-light-blue rounded-lg shadow-sm placeholder-coastal-brown/70 focus:outline-none focus:ring-coastal-teal-green focus:border-coastal-teal-green sm:text-sm text-coastal-dark-blue transition-all duration-300">
+                </div>
+                <button type="submit"
+                    class="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-coastal-dark-blue hover:bg-coastal-teal-green focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-coastal-dark-blue transition-all duration-300 transform hover:scale-105">
+                    Create and Join
+                </button>
+            </form>
+
+            <div class="relative">
+                <div class="absolute inset-0 flex items-center" aria-hidden="true"><div class="w-full border-t border-coastal-light-blue"></div></div>
+                <div class="relative flex justify-center"><span class="bg-white px-2 text-sm text-coastal-brown">OR</span></div>
+            </div>
+
+            <div class="space-y-3">
+                <h3 class="text-lg font-medium text-coastal-dark-blue font-serif">Join an existing one</h3>
+                <div id="community-join-list" class="max-h-60 overflow-y-auto space-y-2 pr-2">
+                    <!-- Community buttons injected here -->
+                </div>
+                <p id="community-list-placeholder" class="text-coastal-brown" style="display: none;"></p>
+            </div>
+        </div>
+    </template>
+
+    <!-- 
+      =================================
+      MODAL TEMPLATES (Hidden)
+      =================================
+    -->
+
+    <!-- Edit/Post Item Form Template (reused by post and edit) -->
+    <template id="template-item-form-content">
+        <input type="hidden" id="form-item-id" value="">
+        <p id="form-error-msg" class="text-sm text-red-600"></p>
+        <div>
+            <label class="block text-sm font-medium text-coastal-dark-blue mb-2">Is this item...</label>
+            <div class="flex space-x-4">
+                <label class="relative flex items-center p-4 border rounded-lg cursor-pointer flex-1 transition-all duration-300" id="form-label-lost">
+                    <input type="radio" name="status" value="lost" class="absolute opacity-0">
+                    <div class="w-5 h-5 rounded-full border-2 mr-3 flex-shrink-0 flex items-center justify-center transition-all duration-300" id="form-radio-lost"></div>
+                    <span class="font-medium" id="form-text-lost">Lost</span>
+                </label>
+                <label class="relative flex items-center p-4 border rounded-lg cursor-pointer flex-1 transition-all duration-300" id="form-label-found">
+                    <input type="radio" name="status" value="found" class="absolute opacity-0">
+                    <div class="w-5 h-5 rounded-full border-2 mr-3 flex-shrink-0 flex items-center justify-center transition-all duration-300" id="form-radio-found"></div>
+                    <span class="font-medium" id="form-text-found">Found</span>
+                </label>
+            </div>
+        </div>
+        <div>
+            <label for="form-item-name" class="block text-sm font-medium text-coastal-dark-blue">Item Name</label>
+            <input id="form-item-name" type="text" placeholder="e.g., Red Wallet" required
+                class="appearance-none block w-full px-3 py-2 border border-coastal-light-blue rounded-lg shadow-sm placeholder-coastal-brown/70 focus:outline-none focus:ring-coastal-teal-green focus:border-coastal-teal-green sm:text-sm text-coastal-dark-blue transition-all duration-300">
+        </div>
+        <div>
+            <label for="form-description" class="block text-sm font-medium text-coastal-dark-blue">Description</label>
+            <textarea id="form-description" rows="3" placeholder="e.g., Leather wallet with a dog photo" required
+                class="appearance-none block w-full px-3 py-2 border border-coastal-light-blue rounded-lg shadow-sm placeholder-coastal-brown/70 focus:outline-none focus:ring-coastal-teal-green focus:border-coastal-teal-green sm:text-sm text-coastal-dark-blue transition-all duration-300"></textarea>
+        </div>
+        <div>
+            <label for="form-location" class="block text-sm font-medium text-coastal-dark-blue">Last Known Location</label>
+            <input id="form-location" type="text" placeholder="e.g., Central Park, near the fountain" required
+                class="appearance-none block w-full px-3 py-2 border border-coastal-light-blue rounded-lg shadow-sm placeholder-coastal-brown/70 focus:outline-none focus:ring-coastal-teal-green focus:border-coastal-teal-green sm:text-sm text-coastal-dark-blue transition-all duration-300">
+        </div>
+        <div>
+            <label for="form-date" class="block text-sm font-medium text-coastal-dark-blue">Date</label>
+            <input id="form-date" type="date" required
+                class="appearance-none block w-full px-3 py-2 border border-coastal-light-blue rounded-lg shadow-sm placeholder-coastal-brown/70 focus:outline-none focus:ring-coastal-teal-green focus:border-coastal-teal-green sm:text-sm text-coastal-dark-blue transition-all duration-300">
+        </div>
+        <div>
+            <label for="form-contact-info" class="block text-sm font-medium text-coastal-dark-blue">Contact Info</label>
+            <input id="form-contact-info" type="text" placeholder="e.g., yourname@example.com or phone number" required
+                class="appearance-none block w-full px-3 py-2 border border-coastal-light-blue rounded-lg shadow-sm placeholder-coastal-brown/70 focus:outline-none focus:ring-coastal-teal-green focus:border-coastal-teal-green sm:text-sm text-coastal-dark-blue transition-all duration-300">
+        </div>
+        <div>
+            <label for="form-item-image" class="block text-sm font-medium text-coastal-dark-blue">Upload Image (Optional, Max 2MB)</label>
+            <div class="mt-1 flex items-center space-x-3">
+                <label class="cursor-pointer bg-white py-2 px-3 border border-coastal-light-blue rounded-lg shadow-sm text-sm leading-4 font-medium text-coastal-dark-blue hover:bg-coastal-off-white transition-colors duration-300">
+                    <span class="flex items-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                        <span id="form-image-btn-text">Select Image</span>
+                    </span>
+                    <input id="form-item-image" name="item-image" type="file" class="sr-only" accept="image/*">
+                </label>
+                <button type="button" id="form-image-remove-btn" class="flex items-center space-x-1 text-xs text-red-600 hover:text-red-800 transition-colors" style="display: none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    <span>Remove Image</span>
+                </button>
+            </div>
+            <img id="form-image-preview" src="" alt="Item preview" class="mt-4 w-full h-40 object-cover rounded-lg shadow-sm" style="display: none;" />
+        </div>
+        <div class="pt-2">
+            <button type="submit" id="form-submit-btn"
+                class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-coastal-dark-blue hover:bg-coastal-teal-green focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-coastal-dark-blue transition-all duration-300 transform hover:scale-105">
+                Submit Report
+            </button>
+        </div>
+    </template>
+
+    <!-- Edit Item Modal -->
+    <div id="edit-item-modal" class="modal fixed inset-0 z-30 overflow-y-auto animate-fadeIn">
+        <div class="flex items-center justify-center min-h-screen p-4 text-center">
+            <div id="edit-modal-backdrop" class="fixed inset-0 bg-black bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+            <div class="relative bg-white rounded-lg shadow-xl w-full max-w-lg p-6 my-8 text-left transition-all transform animate-slideUp">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold text-coastal-dark-blue font-serif">Edit Item</h3>
+                    <button id="edit-modal-close-btn" class="text-coastal-teal-green hover:text-coastal-dark-blue transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                </div>
+                <form id="edit-item-form" class="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
+                    <!-- Form content from template-item-form-content will be injected here -->
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Modal -->
+    <div id="filter-modal" class="modal fixed inset-0 z-30 overflow-y-auto animate-fadeIn">
+        <div class="flex items-center justify-center min-h-screen p-4 text-center">
+            <div id="filter-modal-backdrop" class="fixed inset-0 bg-black bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+            <div class="relative bg-white rounded-lg shadow-xl w-full max-w-md p-6 my-8 text-left transition-all transform animate-slideUp">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold text-coastal-dark-blue font-serif">Filters</h3>
+                    <button id="filter-modal-close-btn" class="text-coastal-teal-green hover:text-coastal-dark-blue transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                </div>
+                <div class="space-y-6">
+                    <!-- Owner Filter -->
+                    <div class="space-y-2">
+                        <span class="text-sm font-medium text-coastal-dark-blue">Show:</span>
+                        <div class="flex flex-wrap gap-2" id="filter-btn-group-owner">
+                            <button data-filter-group="owner" data-filter-value="all" class="filter-btn px-3 py-1.5 rounded-lg font-medium transition-all duration-300 text-sm">All Posts</button>
+                            <button data-filter-group="owner" data-filter-value="mine" class="filter-btn px-3 py-1.5 rounded-lg font-medium transition-all duration-300 text-sm">My Posts</button>
+                        </div>
+                    </div>
+                    <!-- Status Filter -->
+                    <div class="space-y-2">
+                        <span class="text-sm font-medium text-coastal-dark-blue">Status:</span>
+                        <div class="flex flex-wrap gap-2" id="filter-btn-group-status">
+                            <button data-filter-group="status" data-filter-value="all" class="filter-btn px-3 py-1.5 rounded-lg font-medium transition-all duration-300 text-sm">All</button>
+                            <button data-filter-group="status" data-filter-value="lost" class="filter-btn px-3 py-1.5 rounded-lg font-medium transition-all duration-300 text-sm bg-red-100 text-coastal-brown">Lost</button>
+                            <button data-filter-group="status" data-filter-value="found" class="filter-btn px-3 py-1.5 rounded-lg font-medium transition-all duration-300 text-sm bg-coastal-light-blue text-coastal-dark-blue">Found</button>
+                        </div>
+                    </div>
+                    <!-- Date Filter -->
+                    <div class="space-y-2">
+                        <span class="text-sm font-medium text-coastal-dark-blue">Date:</span>
+                        <div class="flex flex-wrap gap-2" id="filter-btn-group-date">
+                            <button data-filter-group="date" data-filter-value="all" class="filter-btn px-3 py-1.5 rounded-lg font-medium transition-all duration-300 text-sm">All Time</button>
+                            <button data-filter-group="date" data-filter-value="today" class="filter-btn px-3 py-1.5 rounded-lg font-medium transition-all duration-300 text-sm">Today</button>
+                            <button data-filter-group="date" data-filter-value="week" class="filter-btn px-3 py-1.5 rounded-lg font-medium transition-all duration-300 text-sm">This Week</button>
+                            <button data-filter-group="date" data-filter-value="month" class="filter-btn px-3 py-1.5 rounded-lg font-medium transition-all duration-300 text-sm">This Month</button>
+                        </div>
+                    </div>
+                    <div class="pt-2">
+                        <button id="filter-modal-done-btn" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-coastal-dark-blue hover:bg-coastal-teal-green transition-all duration-300">
+                            Done
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 
+      =================================
+      JAVASCRIPT LOGIC
+      =================================
+    -->
+    <script type="module">
+        // --- LOCAL STORAGE KEYS ---
+        const USERS_STORAGE_KEY = 'find.net-users';
+        const COMMUNITIES_STORAGE_KEY = 'find.net-communities';
+        const ITEMS_STORAGE_KEY = 'find.net-items';
+        const SESSION_STORAGE_KEY = 'find.net-currentUserEmail';
+
+        // --- LOCAL STORAGE UTILS ---
+        const getFromStorage = (key) => {
+            try {
+                const items = localStorage.getItem(key);
+                return items ? JSON.parse(items) : [];
+            } catch (e) { console.error(`Error reading ${key}`, e); return []; }
+        };
+        const saveToStorage = (key, data) => {
+            try {
+                localStorage.setItem(key, JSON.stringify(data));
+            } catch (e) { console.error(`Error saving ${key}`, e); }
+        };
+
+        // --- APPLICATION STATE ---
+        let state = {
+            currentUser: null, // { email, communityId, communityName }
+            currentPage: 'login',
+            items: [],
+            communities: [],
+            filters: {
+                owner: 'all',
+                status: 'all',
+                date: 'all',
+                search: ''
+            },
+            currentPostForm: { // State for the image in the post/edit form
+                imageDataUrl: null,
+                imageFile: null
+            }
+        };
+
+        // --- DOM ELEMENT SELECTORS ---
+        const $ = (selector) => document.querySelector(selector);
+        const $$ = (selector) => document.querySelectorAll(selector);
+
+        let dom; // Declare globally, assign in DOMContentLoaded
+
+        // --- STATE & ROUTING ---
+        
+        /**
+         * Main render function. Hides all pages and shows the one defined in state.
+         * Calls page-specific render functions.
+         */
+        function render() {
+            const page = state.currentPage;
+            dom.app.mainContent.innerHTML = ''; // Clear main content
+            
+            if (page === 'login') {
+                dom.auth.container.style.display = 'flex';
+                dom.app.container.style.display = 'none';
+            } else {
+                dom.auth.container.style.display = 'none';
+                dom.app.container.style.display = 'flex';
+
+                if (page === 'browse') {
+                    renderBrowsePage();
+                } else if (page === 'post') {
+                    renderPostPage();
+                } else if (page === 'profile') {
+                    renderProfilePage();
+                } else if (page === 'selectCommunity') {
+                    renderSelectCommunityPage();
+                }
+            }
+        }
+        
+        /**
+         * Changes the current page in state and triggers a re-render.
+         */
+        function navigate(pageName) {
+            state.currentPage = pageName;
+            render();
+        }
+
+        // --- PAGE-SPECIFIC RENDERERS ---
+
+        /**
+         * Renders the Browse Page: filters items and builds the item grid.
+         */
+        function renderBrowsePage() {
+            const pageContent = dom.pages.browse.cloneNode(true);
+            const grid = pageContent.querySelector('#items-grid');
+            const placeholder = pageContent.querySelector('#items-grid-placeholder');
+            const placeholderTitle = pageContent.querySelector('#items-grid-placeholder-title');
+            const placeholderText = pageContent.querySelector('#items-grid-placeholder-text');
+            
+            pageContent.querySelector('#browse-community-name').textContent = state.currentUser.communityName;
+            pageContent.querySelector('#search-input').value = state.filters.search;
+            
+            // Apply filters
+            renderItemGrid(grid, placeholder, placeholderTitle, placeholderText);
+            
+            dom.app.mainContent.appendChild(pageContent);
+            
+            // Re-attach listeners for this page
+            $('#search-input').addEventListener('input', (e) => {
+                state.filters.search = e.target.value;
+                renderItemGrid();
+            });
+            $('#open-filter-modal-btn').addEventListener('click', openFilterModal);
+        }
+
+        /**
+         * Renders the Post Item Page: populates and displays the post form.
+         */
+        function renderPostPage() {
+            const pageContent = dom.pages.post.cloneNode(true);
+            const formContainer = pageContent.querySelector('#post-item-form');
+            
+            // Populate the form using the template
+            formContainer.innerHTML = '';
+            formContainer.appendChild(createItemForm('post'));
+            
+            dom.app.mainContent.appendChild(pageContent);
+
+            // Attach listeners
+            $('#post-back-btn').addEventListener('click', () => navigate('browse'));
+            formContainer.addEventListener('submit', handlePostItem);
+            attachFormImageListeners();
+            attachFormRadioListeners();
+        }
+        
+        /**
+         * Renders the Profile Page: shows user email and community.
+         */
+        function renderProfilePage() {
+            const pageContent = dom.pages.profile.cloneNode(true);
+            pageContent.querySelector('#profile-email').textContent = state.currentUser.email;
+            pageContent.querySelector('#profile-community').textContent = state.currentUser.communityName;
+            dom.app.mainContent.appendChild(pageContent);
+            
+            // Attach listeners
+            $('#profile-change-community-btn').addEventListener('click', handleChangeCommunity);
+            $('#profile-logout-btn').addEventListener('click', handleLogout);
+        }
+        
+        /**
+         * Renders the Select Community Page: shows create/join forms.
+         */
+        function renderSelectCommunityPage() {
+            const pageContent = dom.pages.selectCommunity.cloneNode(true);
+            const list = pageContent.querySelector('#community-join-list');
+            const placeholder = pageContent.querySelector('#community-list-placeholder');
+            list.innerHTML = '';
+            
+            if (state.communities.length === 0) {
+                placeholder.textContent = "No communities found. Be the first to create one!";
+                placeholder.style.display = 'block';
+            } else {
+                placeholder.style.display = 'none';
+                state.communities.forEach(community => {
+                    const btn = document.createElement('button');
+                    btn.className = "w-full text-left p-3 bg-coastal-off-white hover:bg-coastal-light-blue rounded-lg transition-colors duration-300";
+                    btn.innerHTML = `<span class="font-medium text-coastal-dark-blue">${community.name}</span>`;
+                    btn.addEventListener('click', () => handleJoinCommunity(community.id));
+                    list.appendChild(btn);
+                });
+            }
+            
+            dom.app.mainContent.appendChild(pageContent);
+            
+            // Attach listeners
+            $('#community-create-form').addEventListener('submit', handleCreateCommunity);
+        }
+
+        // --- AUTH LOGIC ---
+        
+        function setAuthMode(mode) {
+            dom.auth.errorMsg.textContent = '';
+            dom.auth.emailInput.value = '';
+            dom.auth.passwordInput.value = '';
+
+            if (mode === 'login') {
+                dom.auth.form.dataset.mode = 'login';
+                dom.auth.loginTab.classList.add('border-coastal-dark-blue', 'text-coastal-dark-blue');
+                dom.auth.loginTab.classList.remove('border-transparent', 'text-coastal-teal-green');
+                dom.auth.signupTab.classList.add('border-transparent', 'text-coastal-teal-green');
+                dom.auth.signupTab.classList.remove('border-coastal-dark-blue', 'text-coastal-dark-blue');
+                dom.auth.submitBtn.textContent = 'Login';
+            } else {
+                dom.auth.form.dataset.mode = 'signup';
+                dom.auth.signupTab.classList.add('border-coastal-dark-blue', 'text-coastal-dark-blue');
+                dom.auth.signupTab.classList.remove('border-transparent', 'text-coastal-teal-green');
+                dom.auth.loginTab.classList.add('border-transparent', 'text-coastal-teal-green');
+                dom.auth.loginTab.classList.remove('border-coastal-dark-blue', 'text-coastal-dark-blue');
+                dom.auth.submitBtn.textContent = 'Create Account';
+            }
+        }
+
+        function handleAuthSubmit(e) {
+            e.preventDefault();
+            const mode = dom.auth.form.dataset.mode;
+            const email = dom.auth.emailInput.value;
+            const password = dom.auth.passwordInput.value;
+            const users = getFromStorage(USERS_STORAGE_KEY);
+            
+            if (mode === 'login') {
+                const user = users.find(u => u.email === email && u.password === password);
+                if (user) {
+                    loginUser(user);
+                } else {
+                    dom.auth.errorMsg.textContent = "Invalid email or password.";
+                }
+            } else {
+                if (users.find(u => u.email === email)) {
+                    dom.auth.errorMsg.textContent = "An account with this email already exists.";
+                    return;
+                }
+                const newUser = { email, password, communityId: null };
+                users.push(newUser);
+                saveToStorage(USERS_STORAGE_KEY, users);
+                loginUser(newUser);
+            }
+        }
+        
+        function loginUser(user) {
+            sessionStorage.setItem(SESSION_STORAGE_KEY, user.email);
+            state.currentUser = { email: user.email, communityId: user.communityId };
+            
+            if (user.communityId) {
+                const community = state.communities.find(c => c.id === user.communityId);
+                state.currentUser.communityName = community ? community.name : "Unknown Community";
+                dom.app.headerCommunityNameText.textContent = state.currentUser.communityName;
+                dom.app.headerCommunityName.style.display = 'flex';
+                navigate('browse');
+            } else {
+                dom.app.headerCommunityName.style.display = 'none';
+                navigate('selectCommunity');
+            }
+        }
+        
+        function handleLogout() {
+            sessionStorage.removeItem(SESSION_STORAGE_KEY);
+            state.currentUser = null;
+            navigate('login');
+        }
+
+        // --- COMMUNITY LOGIC ---
+        
+        function handleJoinCommunity(communityId) {
+            // Update user in localStorage
+            const users = getFromStorage(USERS_STORAGE_KEY);
+            const userIndex = users.findIndex(u => u.email === state.currentUser.email);
+            if (userIndex === -1) return handleLogout(); // User not found, force logout
+            
+            users[userIndex].communityId = communityId;
+            saveToStorage(USERS_STORAGE_KEY, users);
+            
+            // Update state
+            const community = state.communities.find(c => c.id === communityId);
+            state.currentUser.communityId = communityId;
+            state.currentUser.communityName = community ? community.name : "Unknown Community";
+            
+            dom.app.headerCommunityNameText.textContent = state.currentUser.communityName;
+            dom.app.headerCommunityName.style.display = 'flex';
+            navigate('browse');
+        }
+        
+        function handleCreateCommunity(e) {
+            e.preventDefault();
+            const input = $('#community-name');
+            const communityName = input.value.trim();
+            
+            if (!communityName) {
+                $('#community-error-msg').textContent = "Please enter a name for your new community.";
+                return;
+            }
+            
+            const newCommunity = {
+                id: `local_${Date.now()}`,
+                name: communityName,
+                createdBy: state.currentUser.email
+            };
+            
+            state.communities.push(newCommunity);
+            saveToStorage(COMMUNITIES_STORAGE_KEY, state.communities);
+            
+            handleJoinCommunity(newCommunity.id);
+        }
+        
+        function handleChangeCommunity() {
+            // Update user in localStorage
+            const users = getFromStorage(USERS_STORAGE_KEY);
+            const userIndex = users.findIndex(u => u.email === state.currentUser.email);
+            if (userIndex === -1) return handleLogout();
+            
+            users[userIndex].communityId = null;
+            saveToStorage(USERS_STORAGE_KEY, users);
+            
+            // Update state
+            state.currentUser.communityId = null;
+            state.currentUser.communityName = null;
+            dom.app.headerCommunityName.style.display = 'none';
+            navigate('selectCommunity');
+        }
+
+        // --- ITEM LOGIC (CREATE, READ, UPDATE, DELETE) ---
+        
+        /**
+         * Reads from the Post Item form and creates a new item.
+         */
+        function handlePostItem(e) {
+            e.preventDefault();
+            const form = e.target;
+            
+            const newItem = {
+                id: `local_${Date.now()}`,
+                communityId: state.currentUser.communityId,
+                postedByEmail: state.currentUser.email,
+                createdAt: new Date().toISOString(),
+                itemName: form.querySelector('#form-item-name').value,
+                description: form.querySelector('#form-description').value,
+                location: form.querySelector('#form-location').value,
+                date: form.querySelector('#form-date').value,
+                contactInfo: form.querySelector('#form-contact-info').value,
+                status: form.querySelector('input[name="status"]:checked').value,
+                imageUrl: state.currentPostForm.imageDataUrl // Get image from state
+            };
+            
+            state.items.unshift(newItem); // Add to start of array
+            saveToStorage(ITEMS_STORAGE_KEY, state.items);
+            navigate('browse');
+        }
+        
+        /**
+         * Reads from the Edit Item form and updates an existing item.
+         */
+        function handleUpdateItem(e) {
+            e.preventDefault();
+            const form = e.target;
+            const itemId = form.querySelector('#form-item-id').value;
+            
+            const itemIndex = state.items.findIndex(i => i.id === itemId);
+            if (itemIndex === -1) return; // Should not happen
+
+            const updatedItem = {
+                ...state.items[itemIndex], // Start with original data
+                itemName: form.querySelector('#form-item-name').value,
+                description: form.querySelector('#form-description').value,
+                location: form.querySelector('#form-location').value,
+                date: form.querySelector('#form-date').value,
+                contactInfo: form.querySelector('#form-contact-info').value,
+                status: form.querySelector('input[name="status"]:checked').value,
+                // Only update image if it was changed
+                ...(state.currentPostForm.imageChanged && { imageUrl: state.currentPostForm.imageDataUrl })
+            };
+            
+            state.items[itemIndex] = updatedItem;
+            saveToStorage(ITEMS_STORAGE_KEY, state.items);
+            closeEditModal();
+            renderItemGrid(); // Re-render browse page to show changes
+        }
+        
+        /**
+         * Deletes an item from state and localStorage.
+         */
+        function handleDeleteItem(itemId) {
+            state.items = state.items.filter(item => item.id !== itemId);
+            saveToStorage(ITEMS_STORAGE_KEY, state.items);
+            renderItemGrid(); // Re-render browse page
+        }
+        
+        /**
+         * Applies all filters from state.filters and returns the filtered array.
+         */
+        function getFilteredItems() {
+            const { search, owner, status, date } = state.filters;
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const oneWeekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+            const oneMonthAgo = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+
+            const communityItems = state.items.filter(item => item.communityId === state.currentUser.communityId);
+
+            return communityItems
+                .filter(item => owner === 'all' || item.postedByEmail === state.currentUser.email)
+                .filter(item => status === 'all' || item.status === status)
+                .filter(item => {
+                    if (date === 'all') return true;
+                    const itemDate = new Date(item.date);
+                    if (isNaN(itemDate.getTime())) return false;
+                    if (date === 'today') return itemDate >= today;
+                    if (date === 'week') return itemDate >= oneWeekAgo;
+                    if (date === 'month') return itemDate >= oneMonthAgo;
+                    return true;
+                })
+                .filter(item => {
+                    if (search === '') return true;
+                    const lowerSearch = search.toLowerCase();
+                    return (
+                      item.itemName.toLowerCase().includes(lowerSearch) ||
+                      item.description.toLowerCase().includes(lowerSearch) ||
+                      item.location.toLowerCase().includes(lowerSearch)
+                    );
+                })
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        }
+
+        /**
+         * Renders the item grid. Can be called independently to refresh the list.
+         * If no args are passed, it finds the elements itself.
+         */
+        function renderItemGrid(
+            grid = $('#items-grid'), 
+            placeholder = $('#items-grid-placeholder'), 
+            placeholderTitle = $('#items-grid-placeholder-title'), 
+            placeholderText = $('#items-grid-placeholder-text')
+        ) {
+            if (!grid || !placeholder) return; // Not on the browse page
+
+            const filteredItems = getFilteredItems();
+            
+            grid.innerHTML = ''; // Clear grid
+            if (filteredItems.length > 0) {
+                filteredItems.forEach(item => {
+                    grid.appendChild(createItemCard(item));
+                });
+                placeholder.style.display = 'none';
+                grid.style.display = 'grid';
+            } else {
+                // Show placeholder
+                grid.style.display = 'none';
+                placeholder.style.display = 'flex';
+                const communityItems = state.items.filter(item => item.communityId === state.currentUser.communityId);
+                if (communityItems.length === 0) {
+                    placeholderTitle.textContent = `No items found for ${state.currentUser.communityName}.`;
+                    placeholderText.textContent = "Be the first to post!";
+                } else {
+                    placeholderTitle.textContent = "No items match your filters.";
+                    placeholderText.textContent = "Try adjusting your search or filter settings.";
+                }
+            }
+        }
+
+        /**
+         * Generates the HTML for a single item card.
+         */
+        function createItemCard(item) {
+            const card = document.createElement('div');
+            const isOwner = item.postedByEmail === state.currentUser.email;
+            const itemDate = item.date ? new Date(item.date.replace(/-/g, '/')).toLocaleDateString() : 'N/A';
+            
+            let statusTagStyle, cardBorderStyle;
+            if (item.status === 'lost') {
+                statusTagStyle = 'bg-red-100 text-coastal-brown';
+                cardBorderStyle = 'item-card-lost';
+            } else {
+                statusTagStyle = 'bg-coastal-light-blue text-coastal-dark-blue';
+                cardBorderStyle = 'item-card-found';
+            }
+            
+            card.className = `bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 flex flex-col ${cardBorderStyle}`;
+            
+            card.innerHTML = `
+                ${item.imageUrl ? 
+                    `<img src="${item.imageUrl}" alt="${item.itemName}" class="w-full h-48 object-cover" />` : 
+                    `<div class="w-full h-48 bg-coastal-off-white flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-coastal-light-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    </div>`
+                }
+                <div class="p-5 flex-grow">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="text-xl font-semibold text-coastal-dark-blue font-serif">${item.itemName}</h3>
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold uppercase ${statusTagStyle}">
+                            ${item.status}
+                        </span>
+                    </div>
+                    <p class="text-sm text-coastal-brown mb-1"><span class="font-medium text-coastal-dark-blue">Date:</span> ${itemDate}</p>
+                    <p class="text-sm text-coastal-brown mb-3"><span class="font-medium text-coastal-dark-blue">Location:</span> ${item.location}</p>
+                    <p class="text-coastal-dark-blue text-sm mb-4">${item.description}</p>
+                    ${isOwner ? `
+                        <div class="flex items-center space-x-1.5 ${item.status === 'lost' ? 'text-red-600' : 'text-green-600'} mb-4">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                            <span class="text-sm font-medium uppercase">Your Post</span>
+                        </div>
+                    ` : ''}
+                </div>
+                <div class="p-5 bg-coastal-off-white/50 border-t border-coastal-light-blue/50">
+                    <button class="contact-btn w-full bg-coastal-dark-blue text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-coastal-teal-green transition-all duration-300 transform hover:scale-105">
+                        View Contact Details
+                    </button>
+                    <div class="contact-details mt-4 p-3 bg-coastal-light-blue/50 rounded-lg border border-coastal-light-blue animate-fadeIn" style="display: none;">
+                        <p class="text-sm text-coastal-dark-blue font-medium">Contact Info:</p>
+                        <p class="text-sm text-coastal-dark-blue">${item.contactInfo}</p>
+                        <p class="text-xs text-coastal-brown mt-2">Posted by: ${item.postedByEmail}</p>
+                    </div>
+                    ${isOwner ? `
+                        <div class="mt-3 space-y-2 owner-buttons">
+                            <button class="edit-btn w-full flex items-center justify-center space-x-2 bg-white text-coastal-dark-blue border border-coastal-light-blue px-4 py-2 rounded-lg text-sm font-medium hover:bg-coastal-off-white transition-all duration-300 transform hover:scale-105">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.536L16.732 3.732z" /></svg>
+                                <span>Edit Post</span>
+                            </button>
+                            <button class="delete-btn w-full bg-coastal-brown text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition-all duration-300 transform hover:scale-105">
+                                ${item.status === 'lost' ? 'Mark as Found (Remove)' : 'Remove Post'}
+                            </button>
+                            <div class="delete-confirm p-3 bg-red-50 border border-red-300 rounded-lg text-center animate-fadeIn" style="display: none;">
+                                <p class="text-sm font-medium text-red-800 mb-2 font-serif">Are you sure?</p>
+                                <div class="flex justify-center space-x-2">
+                                    <button class="delete-cancel px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-all duration-300">Cancel</button>
+                                    <button class="delete-confirm-final px-3 py-1 text-sm font-medium text-white bg-red-600 border border-red-600 rounded-md hover:bg-red-700 transition-all duration-300">Yes, Remove</button>
+                                </div>
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            // Add listeners for this specific card
+            card.querySelector('.contact-btn').addEventListener('click', (e) => {
+                const btn = e.currentTarget;
+                const details = card.querySelector('.contact-details');
+                const isHidden = details.style.display === 'none';
+                details.style.display = isHidden ? 'block' : 'none';
+                btn.textContent = isHidden ? 'Hide Contact Details' : 'View Contact Details';
+            });
+            
+            if (isOwner) {
+                card.querySelector('.edit-btn').addEventListener('click', () => openEditModal(item));
+                const deleteBtn = card.querySelector('.delete-btn');
+                const deleteConfirm = card.querySelector('.delete-confirm');
+                deleteBtn.addEventListener('click', () => {
+                    deleteConfirm.style.display = 'block';
+                    deleteBtn.style.display = 'none';
+                });
+                card.querySelector('.delete-cancel').addEventListener('click', () => {
+                    deleteConfirm.style.display = 'none';
+                    deleteBtn.style.display = 'block';
+                });
+                card.querySelector('.delete-confirm-final').addEventListener('click', () => handleDeleteItem(item.id));
+            }
+            
+            return card;
+        }
+        
+        // --- MODAL LOGIC (POST/EDIT/FILTER) ---
+        
+        /**
+         * Creates a pre-populated item form, either for 'post' or 'edit'.
+         */
+        function createItemForm(mode, item = {}) {
+            const formContent = dom.itemForm.template.cloneNode(true);
+            const today = new Date().toISOString().split('T')[0];
+
+            // Set default/item values
+            formContent.querySelector('#form-item-id').value = item.id || '';
+            formContent.querySelector('#form-item-name').value = item.itemName || '';
+            formContent.querySelector('#form-description').value = item.description || '';
+            formContent.querySelector('#form-location').value = item.location || '';
+            formContent.querySelector('#form-date').value = item.date || today;
+            formContent.querySelector('#form-contact-info').value = item.contactInfo || '';
+            formContent.querySelector(`input[name="status"][value="${item.status || 'lost'}"]`).checked = true;
+            
+            formContent.querySelector('#form-submit-btn').textContent = mode === 'post' ? 'Submit Report' : 'Save Changes';
+            
+            // Set image preview if it exists
+            if (item.imageUrl) {
+                formContent.querySelector('#form-image-preview').src = item.imageUrl;
+                formContent.querySelector('#form-image-preview').style.display = 'block';
+                formContent.querySelector('#form-image-remove-btn').style.display = 'flex';
+                formContent.querySelector('#form-image-btn-text').textContent = 'Change Image';
+            }
+            
+            // Reset state for this form instance
+            state.currentPostForm = {
+                imageDataUrl: item.imageUrl || null,
+                imageFile: null,
+                imageChanged: false
+            };
+            
+            return formContent;
+        }
+
+        function openEditModal(item) {
+            dom.modals.editForm.innerHTML = ''; // Clear previous form
+            dom.modals.editForm.appendChild(createItemForm('edit', item));
+            dom.modals.edit.style.display = 'block';
+            
+            // Attach listeners for this specific form
+            dom.modals.editForm.addEventListener('submit', handleUpdateItem);
+            attachFormImageListeners();
+            attachFormRadioListeners();
+        }
+
+        function closeEditModal() {
+            dom.modals.edit.style.display = 'none';
+            // Detach listener to prevent duplicates
+            dom.modals.editForm.removeEventListener('submit', handleUpdateItem);
+        }
+
+        function openFilterModal() {
+            updateFilterButtons();
+            dom.modals.filter.style.display = 'block';
+        }
+        
+        function closeFilterModal() {
+            dom.modals.filter.style.display = 'none';
+        }
+
+        /**
+         * Updates filter buttons to show which one is active.
+         */
+        function updateFilterButtons() {
+            const groups = ['owner', 'status', 'date'];
+            
+            // FIX: Define classes as arrays
+            const activeClasses = ["bg-coastal-dark-blue", "text-white"];
+            const inactiveClasses = ["bg-coastal-off-white", "text-coastal-dark-blue", "hover:bg-coastal-light-blue"];
+            
+            groups.forEach(group => {
+                const activeValue = state.filters[group];
+                $$(`#filter-btn-group-${group} .filter-btn`).forEach(btn => {
+                    // Reset styles
+                    // FIX: Use spread operator to remove all possible classes
+                    btn.classList.remove(...activeClasses, ...inactiveClasses);
+                    
+                    // Apply special classes for lost/found
+                    if (group === 'status' && btn.dataset.filterValue === 'lost') {
+                         btn.classList.add('bg-red-100', 'text-coastal-brown');
+                    }
+                    if (group === 'status' && btn.dataset.filterValue === 'found') {
+                         btn.classList.add('bg-coastal-light-blue', 'text-coastal-dark-blue');
+                    }
+                    
+                    if (btn.dataset.filterValue === activeValue) {
+                        // FIX: Use spread operator
+                        btn.classList.add(...activeClasses);
+
+                        // Remove special classes if active
+                        if (group === 'status') {
+                             btn.classList.remove('bg-red-100', 'text-coastal-brown', 'bg-coastal-light-blue', 'text-coastal-dark-blue');
+                        }
+                    // FIX: Check against the first class in the active array
+                    } else if (!btn.classList.contains(activeClasses[0])) { 
+                        if (group !== 'status' || (btn.dataset.filterValue !== 'lost' && btn.dataset.filterValue !== 'found')) {
+                             // FIX: Use spread operator
+                             btn.classList.add(...inactiveClasses);
+                        }
+                    }
+                });
+            });
+        }
+        
+        /**
+         * Handles clicks on any filter button in the modal.
+         */
+        function handleFilterClick(e) {
+            const btn = e.target.closest('.filter-btn');
+            if (!btn) return;
+            
+            const { filterGroup, filterValue } = btn.dataset;
+            state.filters[filterGroup] = filterValue;
+            updateFilterButtons();
+        }
+
+        // --- FORM UTILITY LISTENERS ---
+        
+        /**
+         * Attaches listeners to the image input/preview for the active form.
+         */
+        function attachFormImageListeners() {
+            const form = dom.modals.edit.style.display === 'block' ? dom.modals.editForm : $('#post-item-form');
+            if (!form) return;
+            
+            const imgInput = form.querySelector('#form-item-image');
+            const imgPreview = form.querySelector('#form-image-preview');
+            const imgRemoveBtn = form.querySelector('#form-image-remove-btn');
+            const imgBtnText = form.querySelector('#form-image-btn-text');
+            const errorMsg = form.querySelector('#form-error-msg');
+
+            imgInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    if (file.size > 2 * 1024 * 1024) { // 2MB Limit
+                        errorMsg.textContent = "Image is too large (Max 2MB).";
+                        imgInput.value = '';
+                        return;
+                    }
+                    errorMsg.textContent = "";
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        state.currentPostForm.imageDataUrl = event.target.result;
+                        state.currentPostForm.imageFile = file;
+                        state.currentPostForm.imageChanged = true;
+                        
+                        imgPreview.src = event.target.result;
+                        imgPreview.style.display = 'block';
+                        imgRemoveBtn.style.display = 'flex';
+                        imgBtnText.textContent = "Change Image";
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            imgRemoveBtn.addEventListener('click', () => {
+                state.currentPostForm.imageDataUrl = null;
+                state.currentPostForm.imageFile = null;
+                state.currentPostForm.imageChanged = true;
+                
+                imgInput.value = ''; // Clear file input
+                imgPreview.src = '';
+                imgPreview.style.display = 'none';
+                imgRemoveBtn.style.display = 'none';
+                imgBtnText.textContent = "Select Image";
+            });
+        }
+        
+        /**
+         * Attaches listeners to the Lost/Found radio buttons for styling.
+         */
+        function attachFormRadioListeners() {
+            const form = dom.modals.edit.style.display === 'block' ? dom.modals.editForm : $('#post-item-form');
+            if (!form) return;
+            
+            const radios = form.querySelectorAll('input[name="status"]');
+            radios.forEach(radio => {
+                radio.addEventListener('change', () => updateRadioStyles(form));
+            });
+            updateRadioStyles(form); // Set initial state
+        }
+        
+        function updateRadioStyles(form) {
+            const lostLabel = form.querySelector('#form-label-lost');
+            const lostRadio = form.querySelector('#form-radio-lost');
+            const lostText = form.querySelector('#form-text-lost');
+            const foundLabel = form.querySelector('#form-label-found');
+            const foundRadio = form.querySelector('#form-radio-found');
+            const foundText = form.querySelector('#form-text-found');
+            
+            if (form.querySelector('input[name="status"][value="lost"]').checked) {
+                lostLabel.className = "relative flex items-center p-4 border rounded-lg cursor-pointer flex-1 transition-all duration-300 border-transparent shadow-lg bg-coastal-brown border-coastal-brown";
+                lostRadio.className = "w-5 h-5 rounded-full border-2 bg-white border-white mr-3 flex-shrink-0 flex items-center justify-center transition-all duration-300";
+                lostRadio.innerHTML = `<div class="w-2 h-2 rounded-full bg-coastal-brown"></div>`;
+                lostText.className = "font-medium text-white";
+                
+                foundLabel.className = "relative flex items-center p-4 border rounded-lg cursor-pointer flex-1 transition-all duration-300 border-coastal-light-blue hover:bg-coastal-off-white";
+                foundRadio.className = "w-5 h-5 rounded-full border-2 border-coastal-light-blue mr-3 flex-shrink-0 flex items-center justify-center transition-all duration-300";
+                foundRadio.innerHTML = "";
+                foundText.className = "font-medium text-coastal-dark-blue";
+            } else {
+                lostLabel.className = "relative flex items-center p-4 border rounded-lg cursor-pointer flex-1 transition-all duration-300 border-coastal-light-blue hover:bg-coastal-off-white";
+                lostRadio.className = "w-5 h-5 rounded-full border-2 border-coastal-light-blue mr-3 flex-shrink-0 flex items-center justify-center transition-all duration-300";
+                lostRadio.innerHTML = "";
+                lostText.className = "font-medium text-coastal-dark-blue";
+                
+                foundLabel.className = "relative flex items-center p-4 border rounded-lg cursor-pointer flex-1 transition-all duration-300 border-transparent shadow-lg bg-coastal-teal-green border-coastal-teal-green text-white";
+                foundRadio.className = "w-5 h-5 rounded-full border-2 bg-white border-white mr-3 flex-shrink-0 flex items-center justify-center transition-all duration-300";
+                foundRadio.innerHTML = `<div class="w-2 h-2 rounded-full bg-coastal-teal-green"></div>`;
+                foundText.className = "font-medium text-white";
+            }
+        }
+        
+        // --- INITIALIZATION ---
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Initialize DOM Elements ---
+            dom = {
+                auth: {
+                    container: $('#auth-container'),
+                    form: $('#auth-form'),
+                    loginTab: $('#auth-tab-login'),
+                    signupTab: $('#auth-tab-signup'),
+                    emailInput: $('#auth-email'),
+                    passwordInput: $('#auth-password'),
+                    submitBtn: $('#auth-submit-btn'),
+                    errorMsg: $('#auth-error-msg'),
+                },
+                app: {
+                    container: $('#app-container'),
+                    mainContent: $('#main-content'),
+                    headerCommunityName: $('#header-community-name'),
+                    headerCommunityNameText: $('#header-community-name span'),
+                },
+                nav: {
+                    logo: $('#nav-logo'),
+                    browse: $('#nav-browse'),
+                    post: $('#nav-post'),
+                    profile: $('#nav-profile'),
+                    logout: $('#nav-logout'),
+                    browseMobile: $('#nav-browse-mobile'),
+                    postMobile: $('#nav-post-mobile'),
+                    profileMobile: $('#nav-profile-mobile'),
+                    logoutMobile: $('#nav-logout-mobile'),
+                },
+                pages: {
+                    browse: $('#template-browse-page').content.cloneNode(true),
+                    post: $('#template-post-page').content.cloneNode(true),
+                    profile: $('#template-profile-page').content.cloneNode(true),
+                    selectCommunity: $('#template-select-community-page').content.cloneNode(true),
+                },
+                modals: {
+                    edit: $('#edit-item-modal'),
+                    editBackdrop: $('#edit-modal-backdrop'),
+                    editCloseBtn: $('#edit-modal-close-btn'),
+                    editForm: $('#edit-item-form'),
+                    filter: $('#filter-modal'),
+                    filterBackdrop: $('#filter-modal-backdrop'),
+                    filterCloseBtn: $('#filter-modal-close-btn'),
+                    filterDoneBtn: $('#filter-modal-done-btn'),
+                },
+                itemForm: {
+                    template: $('#template-item-form-content').content.cloneNode(true)
+                }
+            };
+            
+            // Load initial data
+            state.items = getFromStorage(ITEMS_STORAGE_KEY);
+            state.communities = getFromStorage(COMMUNITIES_STORAGE_KEY);
+            
+            // Check session
+            const loggedInEmail = sessionStorage.getItem(SESSION_STORAGE_KEY);
+            if (loggedInEmail) {
+                const users = getFromStorage(USERS_STORAGE_KEY);
+                const user = users.find(u => u.email === loggedInEmail);
+                if (user) {
+                    loginUser(user);
+                } else {
+                    handleLogout(); // Stale session, log out
+                }
+            } else {
+                navigate('login'); // Show login page
+            }
+            
+            // --- Attach Global Event Listeners ---
+            
+            // Auth
+            dom.auth.loginTab.addEventListener('click', () => setAuthMode('login'));
+            dom.auth.signupTab.addEventListener('click', () => setAuthMode('signup'));
+            dom.auth.form.addEventListener('submit', handleAuthSubmit);
+            
+            // Nav
+            dom.nav.logo.addEventListener('click', () => navigate('browse'));
+            dom.nav.browse.addEventListener('click', () => navigate('browse'));
+            dom.nav.post.addEventListener('click', () => navigate('post'));
+            dom.nav.profile.addEventListener('click', () => navigate('profile'));
+            dom.nav.logout.addEventListener('click', handleLogout);
+            dom.nav.browseMobile.addEventListener('click', () => navigate('browse'));
+            dom.nav.postMobile.addEventListener('click', () => navigate('post'));
+            dom.nav.profileMobile.addEventListener('click', () => navigate('profile'));
+            dom.nav.logoutMobile.addEventListener('click', handleLogout);
+
+            // Modals
+            dom.modals.editCloseBtn.addEventListener('click', closeEditModal);
+            dom.modals.editBackdrop.addEventListener('click', closeEditModal);
+            dom.modals.filterCloseBtn.addEventListener('click', closeFilterModal);
+            dom.modals.filterBackdrop.addEventListener('click', closeFilterModal);
+            dom.modals.filterDoneBtn.addEventListener('click', () => {
+                closeFilterModal();
+                renderItemGrid(); // Re-render browse page with new filters
+            });
+            
+            // Filter Modal Buttons (Event Delegation)
+            $('#filter-modal').addEventListener('click', handleFilterClick);
+            
+            // Set initial auth tab
+            setAuthMode('login');
+        });
+
+    </script>
+</body>
+</html>
